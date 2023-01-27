@@ -26,11 +26,12 @@ jobs:
           distribution: 'temurin'
 
       - name: Build with Maven
-        run: mvn package
+        run: mvn -q package
 
       - name: Setting up version
         id: version
         run: |
+          ls -a
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "Tagging docker image with ${VERSION}"
           echo "::set-output name=jar_version::${VERSION}"
