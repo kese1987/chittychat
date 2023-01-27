@@ -56,7 +56,7 @@ jobs:
         run: |
           ls -a ${{ github.workspace }}
           echo "Docker build with tag: ${{ needs.build.outputs.jar_version }}"
-          docker build --build-arg JAR=${{ needs.build.outputs.jar_version }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${env:APP_NAME}:latest .
+          docker build --build-arg APP_NAME=${env:APP_NAME} --build-arg JAR=${{ needs.build.outputs.jar_version }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${env:APP_NAME}:latest .
 
       - name: Login to DockerHub
         uses: docker/login-action@v1

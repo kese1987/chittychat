@@ -1,5 +1,6 @@
 FROM openjdk:8
 ARG JAR
+ARG APP_NAME
 WORKDIR /
-COPY chittychat-${JAR}.jar chittychat.jar
+COPY ${APP_NAME}-${JAR}.jar ${APP_NAME}.jar
 ENTRYPOINT ["java","-jar","chittychat.jar"]
