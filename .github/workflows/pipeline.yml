@@ -45,8 +45,8 @@ jobs:
       - name: Temporarily save jar artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${APP_NAME}.jar
-          path: target/${APP_NAME}-${{ steps.version.outputs.jar_version }}.jar
+          name: $APP_NAME.jar
+          path: target/$APP_NAME-${{ steps.version.outputs.jar_version }}.jar
           retention-days: 1
   deploy:
     runs-on: ubuntu-latest
