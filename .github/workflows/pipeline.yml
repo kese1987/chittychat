@@ -38,6 +38,7 @@ jobs:
           echo "::set-output name=jar_version::${VERSION}"
 
       - name: test env
+        id: test
         run: |
           echo ${APP_NAME}
           echo ${{APP_NAME}}
