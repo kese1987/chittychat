@@ -67,4 +67,3 @@ jobs:
       - name: Docker push
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{env.APP_NAME}}:${{needs.build.outputs.jar_version}}
-          docker-compose push
