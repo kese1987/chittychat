@@ -5,24 +5,7 @@ metadata:
 
 ---
 
-apiVersion: v1
-kind: Pod
-metadata:
-  name: chittychat
-  namespace: chittychat-namespace
-  labels:
-    app: chittychat
-spec:
-  containers:
-    - name: chittychat
-      image: enricoboschi/chittychat:latest
-      ports:
-        - containerPort: 8080
-          name: chittychat-web-svc
-
----
-
-apiVersion: v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: chittychat-deployment
@@ -31,9 +14,24 @@ metadata:
     app: chittychat
 spec:
   replicas: 3
+  strategy:
+    type: RollingUpdate
   selector:
     matchLabels:
       app: chittychat
+  template:
+    metadata:
+      name: chittychat
+      namespace: chittychat-namespace
+      labels:
+        app: chittychat
+    spec:
+      containers:
+        - name: chittychat
+          image: enricoboschi/chittychat:latest
+          ports:
+            - containerPort: 8080
+              name: chittychat
 
 ---
 
