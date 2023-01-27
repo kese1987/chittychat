@@ -37,11 +37,6 @@ jobs:
           echo "Tagging docker image with ${VERSION}"
           echo "::set-output name=jar_version::${VERSION}"
 
-      - name: test env
-        id: test
-        run: |
-          echo "$APP_NAME"
-
       - name: Temporarily save jar artifact
         uses: actions/upload-artifact@v3
         with:
