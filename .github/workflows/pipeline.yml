@@ -40,8 +40,8 @@ jobs:
       - name: Temporarily save jar artifact
         uses: actions/upload-artifact@v3
         with:
-          name: $APP_NAME.jar
-          path: target/$APP_NAME-${{ steps.version.outputs.jar_version }}.jar
+          name: ${{env.APP_NAME}}.jar
+          path: target/${{env.APP_NAME}}-${{ steps.version.outputs.jar_version }}.jar
           retention-days: 1
   deploy:
     runs-on: ubuntu-latest
@@ -51,12 +51,12 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
         with:
-          name: ${APP_NAME}.jar
+          name: ${{env.APP_NAME}}.jar
       - name: Docker build
         run: |
           ls -a ${{ github.workspace }}
           echo "Docker build with tag: ${{ needs.build.outputs.jar_version }}"
-          docker build --build-arg APP_NAME=${APP_NAME} --build-arg JAR=${{ needs.build.outputs.jar_version }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${APP_NAME}:${{needs.build.outputs.jar_version}} .
+          docker build --build-arg APP_NAME=${{env.APP_NAME}} --build-arg JAR=${{ needs.build.outputs.jar_version }} -t ${{ secrets.DOCKERHUB_USERNAME }}/${APP_NAME}:${{needs.build.outputs.jar_version}} .
 
       - name: Login to DockerHub
         uses: docker/login-action@v1
