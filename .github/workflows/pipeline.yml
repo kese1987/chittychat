@@ -40,7 +40,6 @@ jobs:
       - name: test env
         id: test
         run: |
-          echo "${{APP_NAME}}"
           echo "${env.APP_NAME}"
           echo "$APP_NAME"
 
