@@ -39,7 +39,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: app.jar
-          path: ${{ github.workspace }}/main/target/main-1.0.0.jar
+          path: ${{ github.workspace }}/main/target/chittychat-1.0.0.jar
           retention-days: 1
   deploy:
     runs-on: ubuntu-latest
