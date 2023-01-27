@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: chittychat-namespace
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: chittychat
+  namespace: chittychat-namespace
+  labels:
+    app: chittychat
+spec:
+  containers:
+    - name: chittychat
+      image: enricoboschi/chittychat:latest
+      ports:
+        - containerPort: 8080
+          name: chittychat-web-svc
+
+---
+
+apiVersion: v1
+kind: Deployment
+metadata:
+  name: chittychat-deployment
+  namespace: chittychat-namespace
+  labels:
+    app: chittychat
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: chittychat
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+  namespace: chittychat-namespace
+spec:
+  selector:
+    app: chittychat
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
