@@ -4,17 +4,17 @@ import java.util.Objects;
 
 public class DefaultPod implements Pod {
 
-    private final String ip;
+    private final String address;
     private final String name;
 
-    public DefaultPod(String ip, String name) {
-        this.ip = ip;
+    public DefaultPod(String address, String name) {
+        this.address = address;
         this.name = name;
     }
 
     @Override
-    public String getIp() {
-        return ip;
+    public String getAddress() {
+        return address;
     }
 
     @Override
@@ -27,18 +27,18 @@ public class DefaultPod implements Pod {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DefaultPod that = (DefaultPod) o;
-        return Objects.equals(ip, that.ip) && Objects.equals(name, that.name);
+        return Objects.equals(address, that.address) && Objects.equals(name, that.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(ip, name);
+        return Objects.hash(address, name);
     }
 
     @Override
     public String toString() {
         return "DefaultPod{" +
-                "ip='" + ip + '\'' +
+                "ip='" + address + '\'' +
                 ", name='" + name + '\'' +
                 '}';
     }

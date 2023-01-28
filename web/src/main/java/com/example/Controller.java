@@ -28,7 +28,7 @@ public class Controller {
 
         return sender.send(ping)
                 .thenApply(results -> results.stream().map(it -> {
-                    String msg = it.pod().getName() + "[" + it.pod().getIp() + "] said: ";
+                    String msg = it.pod().getName() + "[" + it.pod().getAddress() + "] said: ";
                     List<String> strings = it.results().stream()
                             .map(result -> serializer.deserialize(result.result(), Ping.Result.class))
                             .map(Ping.Result::response).toList();

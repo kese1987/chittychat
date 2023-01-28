@@ -3,20 +3,16 @@ package com.example.commander.sender;
 import com.example.commander.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.web.client.RestOperations;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 
@@ -59,7 +55,7 @@ public class DefaultSender implements Sender {
                                     HttpEntity<byte[]> request = new HttpEntity<>(serializedCommand, headers);
 
                                     ResponseEntity<byte[]> commandResult =
-                                            client.exchange("http://" + pod.getIp() + "/runCommand",
+                                            client.exchange("http://" + pod.getAddress() + "/runCommand",
                                                     HttpMethod.POST,
                                                     request,
                                                     byte[].class);

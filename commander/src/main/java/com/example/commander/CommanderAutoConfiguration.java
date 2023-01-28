@@ -1,9 +1,6 @@
 package com.example.commander;
 
-import com.example.commander.sender.DefaultK8s;
-import com.example.commander.sender.DefaultSender;
-import com.example.commander.sender.K8s;
-import com.example.commander.sender.Sender;
+import com.example.commander.sender.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
@@ -28,8 +25,9 @@ public class CommanderAutoConfiguration {
     @Bean
     Sender sender(ObjectMapper cborMapper) {
 
+        DefaultKubernetesClient client = new DefaultKubernetesClient();
         return new DefaultSender(
-                new DefaultK8s(new DefaultKubernetesClient(), 8080),
+                new DefaultK8s(client, new DefaultNamespaceSupplier(client),8080),
                 Executors.newFixedThreadPool(5),
                 new RestTemplateBuilder().build(),
                 cborMapper);

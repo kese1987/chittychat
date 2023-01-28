@@ -1,7 +1,7 @@
 package com.example.commander;
 
 public interface Pod {
-    String getIp();
+    String getAddress();
 
     String getName();
 }

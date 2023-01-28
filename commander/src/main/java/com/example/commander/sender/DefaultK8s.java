@@ -16,17 +16,15 @@ import java.util.stream.Collectors;
 public class DefaultK8s implements K8s {
 
     private final KubernetesClient client;
-    private final AtomicInitializer<String> namespace;
+    private final NamespaceSupplier namespace;
+
     private int port;
 
-    public DefaultK8s(KubernetesClient client, int port) {
+    public DefaultK8s(KubernetesClient client,
+                      NamespaceSupplier namespaceSupplier,
+                      int port) {
         this.client = client;
-        namespace = new AtomicInitializer<String>() {
-            @Override
-            protected String initialize() {
-                return client.getConfiguration().getNamespace();
-            }
-        };
+        this.namespace = namespaceSupplier;
         this.port = port;
     }
 
@@ -42,7 +40,7 @@ public class DefaultK8s implements K8s {
                     .list()
                     .getItems()
                     .stream()
-                    .map(it -> new DefaultPod(it.getStatus().getPodIP() + ":" + port, it.getMetadata().getName()))
+                    .map(it -> new DefaultPod(it.getMetadata().getName() + "." + namespace.get() + ":" + port, it.getMetadata().getName()))
                     .collect(Collectors.toList());
 
         } catch (Exception e) {
