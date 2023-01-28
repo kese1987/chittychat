@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: cc-ns
+  name: cc-sa
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: cc-ns
+  name: podsRO
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: cc-ns
+  name: podsROBinding
+subjects:
+  - kind: ServiceAccount
+    name: cc-sa
+roleRef:
+  kind: Role
+  name: podsRO
+  apiGroup: rbac.authorization.k8s.io
