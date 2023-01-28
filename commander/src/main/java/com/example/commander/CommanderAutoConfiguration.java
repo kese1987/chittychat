@@ -29,7 +29,7 @@ public class CommanderAutoConfiguration {
     Sender sender(ObjectMapper cborMapper) {
 
         return new DefaultSender(
-                new DefaultK8s(new DefaultKubernetesClient()),
+                new DefaultK8s(new DefaultKubernetesClient(), 8080),
                 Executors.newFixedThreadPool(5),
                 new RestTemplateBuilder().build(),
                 cborMapper);

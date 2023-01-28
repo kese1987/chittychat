@@ -17,8 +17,9 @@ public class DefaultK8s implements K8s {
 
     private final KubernetesClient client;
     private final AtomicInitializer<String> namespace;
+    private int port;
 
-    public DefaultK8s(KubernetesClient client) {
+    public DefaultK8s(KubernetesClient client, int port) {
         this.client = client;
         namespace = new AtomicInitializer<String>() {
             @Override
@@ -26,6 +27,7 @@ public class DefaultK8s implements K8s {
                 return client.getConfiguration().getNamespace();
             }
         };
+        this.port = port;
     }
 
     @Override
@@ -40,7 +42,7 @@ public class DefaultK8s implements K8s {
                     .list()
                     .getItems()
                     .stream()
-                    .map(it -> new DefaultPod(it.getStatus().getPodIP(), it.getMetadata().getName()))
+                    .map(it -> new DefaultPod(it.getStatus().getPodIP() + ":" + port, it.getMetadata().getName()))
                     .collect(Collectors.toList());
 
         } catch (Exception e) {
