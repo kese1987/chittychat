@@ -1,15 +1,15 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: chittychat-namespace
+  name: cc-ns
 
 ---
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: chittychat-deployment
-  namespace: chittychat-namespace
+  name: cc-dpl
+  namespace: cc-ns
   labels:
     app: chittychat
 spec:
@@ -22,7 +22,7 @@ spec:
   template:
     metadata:
       name: chittychat
-      namespace: chittychat-namespace
+      namespace: cc-ns
       labels:
         app: chittychat
     spec:
@@ -40,8 +40,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: my-service
-  namespace: chittychat-namespace
+  name: cc-svc
+  namespace: cc-ns
 spec:
   selector:
     app: chittychat
@@ -50,3 +50,18 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 8080
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cc-ing
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  defaultBackend:
+    service:
+      name: cc-svc
+      port:
+        number: 80
