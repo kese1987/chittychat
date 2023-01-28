@@ -24,6 +24,9 @@
 
 
     <build>
+
+        <finalName>chittychat-${project.version}</finalName>
+
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
