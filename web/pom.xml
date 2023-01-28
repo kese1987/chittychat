@@ -10,14 +10,26 @@
     <packaging>jar</packaging>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>commander</artifactId>
-    <name>commander</name>
+    <artifactId>web</artifactId>
+
+    <name>web</name>
 
     <dependencies>
         <dependency>
-            <groupId>io.fabric8</groupId>
-            <artifactId>kubernetes-client</artifactId>
-            <version>6.4.0</version>
+            <groupId>com.example</groupId>
+            <artifactId>commander</artifactId>
+            <version>0.0.1</version>
         </dependency>
     </dependencies>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

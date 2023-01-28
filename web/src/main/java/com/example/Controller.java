@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.example;
 
 import com.example.commander.Kubernetes;
 import org.springframework.web.bind.annotation.GetMapping;
