@@ -40,7 +40,7 @@ public class DefaultK8s implements K8s {
                     .list()
                     .getItems()
                     .stream()
-                    .map(it -> new DefaultPod(it.getMetadata().getName() + "." + namespace.get() + ":" + port, it.getMetadata().getName()))
+                    .map(it -> new DefaultPod(it.getStatus().getPodIP().replace(".", "-") + "." + namespace.get() + ".pod:" + port, it.getMetadata().getName()))
                     .collect(Collectors.toList());
 
         } catch (Exception e) {
