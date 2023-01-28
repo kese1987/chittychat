@@ -13,7 +13,7 @@ public class Controller {
     @GetMapping("/ping")
     public String ping() throws UnknownHostException {
 
-        return InetAddress.getLocalHost().getHostName() + ": pong (" + Kubernetes.getNamespace() + ")";
+        return "pods: " + Kubernetes.pods();
     }
 
 }
