@@ -27,7 +27,7 @@ public class CommanderAutoConfiguration {
 
         DefaultKubernetesClient client = new DefaultKubernetesClient();
         return new DefaultSender(
-                new DefaultK8s(client, new DefaultNamespaceSupplier(client),8080),
+                new DefaultK8s(client, new DefaultNamespaceSupplier(client),8080, new DefaultHostnameSupplier()),
                 Executors.newFixedThreadPool(5),
                 new RestTemplateBuilder().build(),
                 cborMapper);
