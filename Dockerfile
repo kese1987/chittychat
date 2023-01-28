@@ -1,4 +1,4 @@
-FROM openjdk:8
+FROM openjdk:17
 ARG JAR
 ARG APP_NAME
 WORKDIR /
