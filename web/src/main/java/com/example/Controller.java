@@ -2,6 +2,7 @@ package com.example;
 
 import com.example.commander.sender.Sender;
 import com.example.commands.Ping;
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,15 +16,15 @@ import java.util.concurrent.CompletableFuture;
 public class Controller {
 
     private final Sender sender;
+    private final ObjectMapper mapper;
     private CBORSerializer serializer;
-    private ObjectMapper mapper;
+
 
     public Controller(Sender sender,
-                      CBORSerializer serializer,
-                      ObjectMapper mapper) {
+                      CBORSerializer serializer) {
         this.sender = sender;
         this.serializer = serializer;
-        this.mapper = mapper;
+        this.mapper = new ObjectMapper(new JsonFactory());
     }
 
     @GetMapping(value = "ping", produces = {"application/json"})
