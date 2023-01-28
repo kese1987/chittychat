@@ -21,7 +21,7 @@ public class Controller {
         this.serializer = serializer;
     }
 
-    @GetMapping("/ping")
+    @GetMapping("ping")
     public CompletableFuture<String> ping() throws UnknownHostException {
 
         byte[] ping = serializer.serialize(new Ping("Hello neighbor, I'm your master!"));

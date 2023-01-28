@@ -62,8 +62,14 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:
-  defaultBackend:
-    service:
-      name: cc-svc
-      port:
-        number: 80
+  rules:
+    - host: cc.example.com
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/ping"
+            backend:
+              service:
+                name: cc-svc
+                port:
+                  number: 80
