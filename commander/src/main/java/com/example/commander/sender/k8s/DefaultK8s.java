@@ -30,7 +30,7 @@ public class DefaultK8s implements K8s {
         this.runningPod = new AtomicInitializer<Pod>() {
             @Override
             protected Pod initialize() throws ConcurrentException {
-                return podsMatching(hostnameSupplier.get(), pod -> pod.getMetadata().getName().equals(hostnameSupplier.get())).stream().findFirst().orElse(null);
+                return podsMatching(namespace.get(), pod -> pod.getMetadata().getName().equals(hostnameSupplier.get())).stream().findFirst().orElse(null);
             }
         };
 
@@ -50,7 +50,7 @@ public class DefaultK8s implements K8s {
     public List<com.example.commander.Pod> pods() {
 
         try {
-            return podsMatching(hostnameSupplier.get(), pod -> !pod.getMetadata().getName().equals(hostnameSupplier.get()));
+            return podsMatching(namespace.get(), pod -> !pod.getMetadata().getName().equals(hostnameSupplier.get()));
 
         } catch (Exception e) {
             throw new RuntimeException(e);
