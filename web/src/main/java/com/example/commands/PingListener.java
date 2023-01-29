@@ -1,9 +1,10 @@
 package com.example.commands;
 
-import com.example.CBORSerializer;
-import com.example.commander.DefaultRawResult;
-import com.example.commander.RawResult;
+import com.example.commander.CBORSerializer;
+import com.example.commander.result.HandlerResult;
 import com.example.commander.receiver.CommandListener;
+import com.example.commander.result.RawResult;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +25,7 @@ public class PingListener implements CommandListener {
     @Override
     public boolean supports(byte[] rawCommand) {
 
-        ExecutableCommands command = serde.deserialize(rawCommand, ExecutableCommands.class);
+        var command = serde.deserialize(rawCommand, new TypeReference<ExecutableCommands>() {});
 
         if(command instanceof Ping p){
             commands.put(rawCommand, p);
@@ -35,13 +36,19 @@ public class PingListener implements CommandListener {
     }
 
     @Override
-    public CompletableFuture<DefaultRawResult> onCommand(byte[] rawCommand) {
+    public CompletableFuture<RawResult> onCommand(byte[] rawCommand) {
 
         Ping ping = commands.get(rawCommand);
 
-        byte[] result = serde.serialize(new Ping.Result(ping.masterMessage() + "-> Hello Master, pong ("+instance+")!"));
+        byte[] result = serde.serialize(new Ping.Result(ping.masterMessage() + "-> Hello Master, pong (" + instance + ")!"),
+                new TypeReference<Ping.Result>() {});
 
-        return CompletableFuture.completedFuture(new DefaultRawResult(result));
+        return CompletableFuture.completedFuture(new HandlerResult(instance, result));
 
+    }
+
+    @Override
+    public String id() {
+        return instance;
     }
 }

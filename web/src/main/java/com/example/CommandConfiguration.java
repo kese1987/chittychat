@@ -1,9 +1,9 @@
 package com.example;
 
+import com.example.commander.CBORSerializer;
 import com.example.commander.receiver.CommandListener;
 import com.example.commands.PingListener;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,9 +19,7 @@ public class CommandConfiguration {
         return new PingListener(serde, "handler2");
     }
 
-    @Bean
-    CBORSerializer serde(ObjectMapper cborMapper) {
-        return new CBORSerializer(cborMapper);
-    }
+
+
 
 }
