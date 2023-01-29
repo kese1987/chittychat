@@ -1,8 +1,7 @@
 package com.example.commands;
 
-import com.example.CBORSerializer;
-import com.example.commander.DefaultRawResult;
-import com.example.commander.RawResult;
+import com.example.commander.CBORSerializer;
+import com.example.commander.raw.result.HandlerResult;
 import com.example.commander.receiver.CommandListener;
 
 import java.util.HashMap;
@@ -35,13 +34,13 @@ public class PingListener implements CommandListener {
     }
 
     @Override
-    public CompletableFuture<DefaultRawResult> onCommand(byte[] rawCommand) {
+    public CompletableFuture<HandlerResult> onCommand(byte[] rawCommand) {
 
         Ping ping = commands.get(rawCommand);
 
         byte[] result = serde.serialize(new Ping.Result(ping.masterMessage() + "-> Hello Master, pong ("+instance+")!"));
 
-        return CompletableFuture.completedFuture(new DefaultRawResult(result));
+        return CompletableFuture.completedFuture(new HandlerResult(result));
 
     }
 }

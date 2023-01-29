@@ -1,11 +1,11 @@
 package com.example;
 
+import com.example.commander.CBORSerializer;
 import com.example.commander.sender.Sender;
 import com.example.commands.Ping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.UnknownHostException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -26,7 +26,7 @@ public class Controller {
 
         byte[] ping = serializer.serialize(new Ping("Hello neighbor, I'm your master!"));
 
-        return sender.send(ping)
+        return sender.run(ping)
                 .thenApply(results -> results.stream().map(it -> {
                     String msg = it.pod().getName() + "[" + it.pod().getAddress() + "] said: ";
                     List<String> strings = it.results().stream()

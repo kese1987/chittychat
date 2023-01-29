@@ -1,14 +1,14 @@
-package com.example.commander;
+package com.example.commander.raw.result;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Arrays;
 
-public record DefaultRawResult(@JsonProperty byte[] result) implements RawResult{
+public record HandlerResult(@JsonProperty byte[] result) implements RawResult {
 
     @JsonCreator
-    public DefaultRawResult(@JsonProperty("result") byte[] result) {
+    public HandlerResult(@JsonProperty("result") byte[] result) {
         this.result = result;
     }
 
@@ -16,12 +16,19 @@ public record DefaultRawResult(@JsonProperty byte[] result) implements RawResult
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DefaultRawResult that = (DefaultRawResult) o;
+        HandlerResult that = (HandlerResult) o;
         return Arrays.equals(result, that.result);
     }
 
     @Override
     public int hashCode() {
         return Arrays.hashCode(result);
+    }
+
+    @Override
+    public String toString() {
+        return "HandlerResult{" +
+                "result=" + Arrays.toString(result) +
+                '}';
     }
 }

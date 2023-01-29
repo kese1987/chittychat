@@ -1,9 +1,8 @@
 package com.example.commander.receiver;
 
 import com.example.commander.DefaultRawCommand;
-import com.example.commander.DefaultRawResult;
+import com.example.commander.raw.result.HandlerResult;
 import com.example.commander.RawCommand;
-import com.example.commander.RawResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,9 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
 
 @RestController
 public class Dispatcher {
@@ -30,15 +26,15 @@ public class Dispatcher {
         this.mapper = mapper;
     }
 
-    @PostMapping("runCommand")
-    CompletableFuture<byte[]> exec(@RequestBody byte[] cmd) {
+    @PostMapping("run")
+    CompletableFuture<byte[]> run(@RequestBody byte[] cmd) {
 
         try {
 
             RawCommand command = mapper.readValue(cmd, DefaultRawCommand.class);
 
 
-            List<CompletableFuture<DefaultRawResult>> commandsResult = listeners.stream()
+            List<CompletableFuture<HandlerResult>> commandsResult = listeners.stream()
                     .filter(listener -> listener.supports(command.command()))
                     .map(listener -> listener.onCommand(command.command()))
                     .toList();
@@ -46,7 +42,7 @@ public class Dispatcher {
 
             CompletableFuture<byte[]> listCompletableFuture = CompletableFuture.allOf(commandsResult.toArray(new CompletableFuture[0]))
                     .thenApply(__ -> {
-                        List<DefaultRawResult> results = commandsResult
+                        List<HandlerResult> results = commandsResult
                             .stream()
                             .map(CompletableFuture::join)
                             .filter(Objects::nonNull)
