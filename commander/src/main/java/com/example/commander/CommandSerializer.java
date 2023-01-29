@@ -1,7 +1,10 @@
 package com.example.commander;
 
-public interface CommandSerializer {
-    <T> T deserialize(byte[] object);
+import com.fasterxml.jackson.core.type.TypeReference;
 
-    byte[] serialize(Object t);
+public interface CommandSerializer {
+
+    <T> T deserialize(byte[] object, TypeReference<T> type);
+
+    <T> byte[] serialize(Object t, TypeReference<T> type);
 }

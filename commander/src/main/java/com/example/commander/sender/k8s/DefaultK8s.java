@@ -1,14 +1,11 @@
-package com.example.commander.sender;
+package com.example.commander.sender.k8s;
 
-import com.example.commander.DefaultPod;
 import com.example.commander.Pod;
 import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.PodResource;
-import org.apache.commons.lang3.concurrent.AtomicInitializer;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,7 +42,7 @@ public class DefaultK8s implements K8s {
                     .getItems()
                     .stream()
                     .filter(it -> !it.getMetadata().getName().equals(hostname))
-                    .map(it -> new DefaultPod(it.getStatus().getPodIP().replace(".", "-") + "." + namespace.get() + ".pod:" + port, it.getMetadata().getName()))
+                    .map(it -> new Pod(it.getStatus().getPodIP().replace(".", "-") + "." + namespace.get() + ".pod:" + port, it.getMetadata().getName()))
                     .collect(Collectors.toList());
 
         } catch (Exception e) {

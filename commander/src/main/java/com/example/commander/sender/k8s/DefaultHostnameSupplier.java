@@ -1,9 +1,9 @@
-package com.example.commander.sender;
+package com.example.commander.sender.k8s;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public class DefaultHostnameSupplier implements HostnameSupplier{
+public class DefaultHostnameSupplier implements HostnameSupplier {
     @Override
     public String get() {
         try {

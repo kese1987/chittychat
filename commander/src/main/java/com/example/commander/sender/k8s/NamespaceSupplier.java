@@ -1,4 +1,4 @@
-package com.example.commander.sender;
+package com.example.commander.sender.k8s;
 
 import java.util.function.Supplier;
 

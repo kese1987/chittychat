@@ -1,4 +1,4 @@
-package com.example.commander.raw.result;
+package com.example.commander.result;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;

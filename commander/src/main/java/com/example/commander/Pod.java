@@ -1,7 +1,3 @@
 package com.example.commander;
 
-public interface Pod {
-    String getAddress();
-
-    String getName();
-}
+public record Pod(String fqdn, String hostname) { }

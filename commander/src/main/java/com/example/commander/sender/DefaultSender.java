@@ -1,19 +1,15 @@
 package com.example.commander.sender;
 
 import com.example.commander.*;
-import com.example.commander.raw.result.PodException;
-import com.example.commander.raw.result.PodResults;
-import com.example.commander.raw.result.RawPodResults;
-import com.example.commander.raw.result.RawResult;
+import com.example.commander.result.RawPodResults;
+import com.example.commander.sender.command.SyncCommandManager;
+import com.example.commander.sender.command.AsyncCommandManager;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.*;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestOperations;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.*;
 
 
@@ -21,75 +17,47 @@ public class DefaultSender implements Sender {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultSender.class);
 
-    private final K8s k8s;
-    private final ExecutorService executorService;
-    private final RestOperations client;
+    private final AsyncCommandManager asyncCommandManager;
+    private final SyncCommandManager syncCommandManager;
     private final CommandSerializer serde;
 
 
-    public DefaultSender(K8s k8s,
-                         ExecutorService executorService,
-                         RestOperations client,
-                         CommandSerializer serde) {
+    public DefaultSender(AsyncCommandManager asyncCommandManager,
+                         SyncCommandManager syncCommandManager,
+                         CommandSerializer serde)  {
 
-        this.k8s = k8s;
-        this.executorService = executorService;
-        this.client = client;
 
+        this.asyncCommandManager = asyncCommandManager;
+        this.syncCommandManager = syncCommandManager;
         this.serde = serde;
     }
 
     @Override
     public List<RawPodResults> run(byte[] command){
 
-        byte[] serializedCommand = serde.serialize(new DefaultRawCommand(command, "signature".getBytes(StandardCharsets.UTF_8)));
+        byte[] serializedCommand = serializeCommand(command);
 
-        return k8s.pods().stream()
-                .map(pod -> new CommandEnvelope(pod, doRun(serializedCommand, pod)))
-                .map(this::maybeValue).toList();
+        try {
+            return syncCommandManager.run(serializedCommand);
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
     }
 
-    private RawPodResults maybeValue(CommandEnvelope envelope)  {
-        try {
-            return envelope.future.get(60, TimeUnit.SECONDS);
-        } catch (Exception e){
-            return new PodException(envelope.pod, e);
-        }
+
+    private byte[] serializeCommand(byte[] command) {
+        return serde.serialize(new RawCommand(command, "signature".getBytes(StandardCharsets.UTF_8)), new TypeReference<RawCommand>() {
+        });
     }
 
     @Override
     public CompletableFuture<List<RawPodResults>> runAsync(byte[] command) {
-        return null;
+        byte[] serializedCommand = serializeCommand(command);
+
+        try {
+            return asyncCommandManager.runAsync(serializedCommand);
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
     }
-
-
-    private CompletableFuture<RawPodResults> doRun(byte[] command, Pod pod) {
-        return CompletableFuture.supplyAsync(() -> {
-
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-                HttpEntity<byte[]> request = new HttpEntity<>(command, headers);
-
-                try {
-
-                    ResponseEntity<byte[]> commandResult =
-                            client.exchange("http://" + pod.getAddress() + "/run",
-                                    HttpMethod.POST,
-                                    request,
-                                    byte[].class);
-
-                    if (commandResult.getStatusCode().is2xxSuccessful()){
-                        var results = serde.<List<RawResult>>deserialize(commandResult.getBody());
-                        return new PodResults(pod, results);
-                    }
-                    throw new CommandException(pod, commandResult.getStatusCode());
-                } catch (HttpStatusCodeException e) {
-                    throw new CommandException(pod, e);
-                }
-
-        }, executorService);
-    }
-
-    private record CommandEnvelope(Pod pod, CompletableFuture<RawPodResults> future){}
-
 }

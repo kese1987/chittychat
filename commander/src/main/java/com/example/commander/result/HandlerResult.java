@@ -1,14 +1,15 @@
-package com.example.commander.raw.result;
+package com.example.commander.result;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Arrays;
 
-public record HandlerResult(@JsonProperty byte[] result) implements RawResult {
+public record HandlerResult(String id, @JsonProperty byte[] result) implements RawResult {
 
     @JsonCreator
-    public HandlerResult(@JsonProperty("result") byte[] result) {
+    public HandlerResult(String id, @JsonProperty("result") byte[] result) {
+        this.id = id;
         this.result = result;
     }
 

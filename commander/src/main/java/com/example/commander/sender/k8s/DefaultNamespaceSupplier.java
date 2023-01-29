@@ -1,4 +1,4 @@
-package com.example.commander.sender;
+package com.example.commander.sender.k8s;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.apache.commons.lang3.concurrent.AtomicInitializer;

@@ -19,9 +19,7 @@ public class CommandConfiguration {
         return new PingListener(serde, "handler2");
     }
 
-    @Bean
-    CBORSerializer serde(ObjectMapper cborMapper) {
-        return new CBORSerializer(cborMapper);
-    }
+
+
 
 }

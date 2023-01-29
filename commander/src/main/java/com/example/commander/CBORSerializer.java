@@ -12,18 +12,18 @@ public class CBORSerializer implements CommandSerializer {
     }
 
     @Override
-    public <T> T deserialize(byte[] object){
+    public <T> T deserialize(byte[] object, TypeReference<T> type){
         try {
-            return mapper.readValue(object, new TypeReference<>() {});
+            return mapper.readValue(object, type);
         } catch (Exception e){
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public byte[] serialize(Object t){
+    public <T> byte[] serialize(Object t, TypeReference<T> type){
         try {
-            return mapper.writeValueAsBytes(t);
+            return mapper.writerFor(type).writeValueAsBytes(t);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
