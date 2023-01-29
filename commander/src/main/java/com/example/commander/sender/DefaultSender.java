@@ -42,39 +42,19 @@ public class DefaultSender implements Sender {
     @Override
     public List<RawPodResults> run(byte[] command){
 
-        try {
-            byte[] serializedCommand = serde.serialize(new DefaultRawCommand(command, "signature".getBytes(StandardCharsets.UTF_8)));
+        byte[] serializedCommand = serde.serialize(new DefaultRawCommand(command, "signature".getBytes(StandardCharsets.UTF_8)));
 
-
-            k8s.pods().stream().map(pod -> doRun(serializedCommand, pod))
-                    .map(future -> maybeValue(it));
-
-            CompletableFuture.allOf(futurePodResults.toArray(new CompletableFuture[0])).join();
-
-
-            return futurePodResults
-                      .stream()
-                      .map(it -> maybeValue(it))
-                            .filter(Objects::nonNull).toList();
-
-
-        } catch (Exception e){
-            CompletableFuture<List<RawPodResults>> failure = new CompletableFuture<>();
-            failure.completeExceptionally(e);
-            return failure;
-        }
-
-
+        return k8s.pods().stream()
+                .map(pod -> new CommandEnvelope(pod, doRun(serializedCommand, pod)))
+                .map(this::maybeValue).toList();
     }
 
-    private RawPodResults maybeValue(Pod pod, CompletableFuture<RawPodResults> it)  {
-
+    private RawPodResults maybeValue(CommandEnvelope envelope)  {
         try {
-            return it.get(60, TimeUnit.SECONDS);
+            return envelope.future.get(60, TimeUnit.SECONDS);
         } catch (Exception e){
-            return new PodException(pod, e);
+            return new PodException(envelope.pod, e);
         }
-
     }
 
     @Override
@@ -109,5 +89,7 @@ public class DefaultSender implements Sender {
 
         }, executorService);
     }
+
+    private record CommandEnvelope(Pod pod, CompletableFuture<RawPodResults> future){}
 
 }

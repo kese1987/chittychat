@@ -6,6 +6,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public interface Sender {
-    CompletableFuture<List<RawPodResults>> run(byte[] command);
+    List<RawPodResults> run(byte[] command);
     CompletableFuture<List<RawPodResults>> runAsync(byte[] command);
 }
