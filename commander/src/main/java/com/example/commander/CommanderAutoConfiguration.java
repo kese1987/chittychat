@@ -42,7 +42,7 @@ public class CommanderAutoConfiguration {
 
     @Bean
     ExecutorService executorService(){
-        return Executors.newFixedThreadPool(5);
+        return Executors.newFixedThreadPool(10);
     }
 
     @Bean

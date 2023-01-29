@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestOperations;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -56,16 +57,21 @@ public class CommandController {
         CompletableFuture.runAsync(() -> {
             RawCommand command = commandSerializer.deserialize(cmd, new TypeReference<>() {});
 
+            logger.debug("gathering results");
+
             var futures = listeners
                 .stream()
                 .filter(listener -> listener.supports(command.command()))
                 .map(listener -> listener.onCommand(command.command())).toList();
 
+
             var results = CompletableFuture
                 .allOf(futures.toArray(new CompletableFuture[0]))
                 .thenApply(__ -> futures.stream().map(CompletableFuture::join).filter(Objects::nonNull).toList())
+                    .exceptionally(e -> Collections.emptyList())
                  .join();
 
+            logger.debug("results available!");
             var as = commandSerializer.serialize(new AsyncResult(new JobId(jobId), new PodId(podId), results), new TypeReference<AsyncResult>() {
             });
 
@@ -75,11 +81,14 @@ public class CommandController {
 
             try {
 
+                logger.debug("calling callback");
                 ResponseEntity<byte[]> commandResult =
                         client.exchange("http://" + target + "/asyncCallback",
                                 HttpMethod.POST,
                                 request,
                                 byte[].class);
+
+
 
             } catch (Exception e) {
                 logger.error("Failed to callback",e);

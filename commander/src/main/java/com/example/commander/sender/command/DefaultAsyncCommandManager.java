@@ -11,6 +11,8 @@ import com.google.common.collect.Maps;
 import org.apache.commons.lang3.concurrent.AtomicSafeInitializer;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 
 public class DefaultAsyncCommandManager implements CallableAsyncCommandManager {
 
+    private static final Logger logger = LoggerFactory.getLogger(DefaultAsyncCommandManager.class);
     private static final  Map<JobId, Job> issuedJobs = Maps.newConcurrentMap();
 
     private final ExecutorService executorService;
@@ -41,7 +44,7 @@ public class DefaultAsyncCommandManager implements CallableAsyncCommandManager {
         this.reconcilingJob = new AtomicSafeInitializer<>() {
             @Override
             protected ScheduledFuture<?> initialize() throws ConcurrentException {
-                return scheduledExecService.scheduleAtFixedRate(DefaultAsyncCommandManager.this::updateIssuedJobs, 60, 60, TimeUnit.SECONDS);
+                return scheduledExecService.scheduleAtFixedRate(DefaultAsyncCommandManager.this::updateIssuedJobs, 0, 10, TimeUnit.SECONDS);
             }
         };
         this.kube = kube;
@@ -58,7 +61,9 @@ public class DefaultAsyncCommandManager implements CallableAsyncCommandManager {
                 return false;
             }).count();
 
+            logger.debug("pending job " + pendingJobs);
             if (pendingJobs == 0) {
+                logger.debug("job ready");
                 var results = job.jobs.entrySet().stream().map(it -> {
                     if(it.getValue() instanceof Pending){
                         return (RawPodResults)new PodException(job.pods.get(it.getKey()), new RuntimeException("Max execution time expired!"));
@@ -69,6 +74,7 @@ public class DefaultAsyncCommandManager implements CallableAsyncCommandManager {
                     return null;
                 }).filter(Objects::nonNull).toList();
 
+                logger.debug("future resolved");
                 job.future.complete(results);
                 issuedJobs.remove(id);
             }
@@ -110,7 +116,10 @@ public class DefaultAsyncCommandManager implements CallableAsyncCommandManager {
     @Override
     public void callback(AsyncResult result) {
         issuedJobs.computeIfPresent(result.jobId(), (jid, job) -> {
-            job.jobs.computeIfPresent(result.podId(), (pid, status) -> new Completed(result.results()));
+            job.jobs.computeIfPresent(result.podId(), (pid, status) -> {
+                logger.debug("saved job result");
+                return new Completed(result.results());
+            });
             return job;
         });
     }
@@ -132,6 +141,8 @@ public class DefaultAsyncCommandManager implements CallableAsyncCommandManager {
                                 HttpMethod.POST,
                                 request,
                                 Void.class);
+
+
 
                 if (commandResult.getStatusCode().is2xxSuccessful()){
                     return;

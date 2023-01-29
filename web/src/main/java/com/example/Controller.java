@@ -8,6 +8,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 @RestController
 public class Controller {
 
+    private static final Logger logger = LoggerFactory.getLogger(Controller.class);
     private final Sender sender;
     private CommandSerializer serializer;
     private final ObjectMapper objectMapper;
@@ -33,21 +36,26 @@ public class Controller {
         this.objectMapper = objectMapper;
     }
 
-    @GetMapping(value = "async", produces = {"application/json"})
-    public CompletableFuture<ResponseEntity<String>> async() {
+    @GetMapping(value = "/async", produces = {"application/json"})
+    public ResponseEntity<String> async() {
+
+        logger.debug("async command started");
         byte[] ping = serializer.serialize(new Ping("Hello neighbor, I'm your master!"), new TypeReference<Ping>() {
         });
 
         return sender.runAsync(ping).thenApply(results -> {
             try {
+
+                logger.debug("returning results");
+
                 return ResponseEntity.ok(objectMapper.writeValueAsString(toMap(results)));
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
-        });
+        }).join();
     }
     
-    @GetMapping(value = "ping", produces = {"application/json"})
+    @GetMapping(value = "/ping", produces = {"application/json"})
     public ResponseEntity<String> ping() {
 
         byte[] ping = serializer.serialize(new Ping("Hello neighbor, I'm your master!"), new TypeReference<Ping>() {
