@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface K8s {
 
+    Pod runningPod();
     List<Pod> pods();
 
 }

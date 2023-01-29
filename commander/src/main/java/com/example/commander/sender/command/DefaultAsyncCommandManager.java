@@ -2,6 +2,9 @@ package com.example.commander.sender.command;
 
 import com.example.commander.CommandException;
 import com.example.commander.Pod;
+import com.example.commander.domain.AsyncResult;
+import com.example.commander.domain.JobId;
+import com.example.commander.domain.PodId;
 import com.example.commander.result.*;
 import com.example.commander.sender.k8s.K8s;
 import com.google.common.collect.Maps;
@@ -105,9 +108,9 @@ public class DefaultAsyncCommandManager implements CallableAsyncCommandManager {
     }
 
     @Override
-    public void callback(String jobId, String podId, List<RawResult> result) {
-        issuedJobs.computeIfPresent(new JobId(jobId), (jid, job) -> {
-            job.jobs.computeIfPresent(new PodId(podId), (pid, status) -> new Completed(result));
+    public void callback(AsyncResult result) {
+        issuedJobs.computeIfPresent(result.jobId(), (jid, job) -> {
+            job.jobs.computeIfPresent(result.podId(), (pid, status) -> new Completed(result.results()));
             return job;
         });
     }
@@ -118,6 +121,8 @@ public class DefaultAsyncCommandManager implements CallableAsyncCommandManager {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             headers.set("X-JobId", jobId);
+            headers.set("X-Callback-Pod-Fqdn", kube.runningPod().fqdn());
+            headers.set("X-PodId", pod.hostname());
             HttpEntity<byte[]> request = new HttpEntity<>(command, headers);
 
             try {
@@ -145,8 +150,7 @@ public class DefaultAsyncCommandManager implements CallableAsyncCommandManager {
     private record Completed(List<RawResult> result) implements CommandStatus {}
     private record Pending(Instant issuedAt)  implements CommandStatus {}
 
-    private record JobId(String value) {}
-    private record PodId(String id){}
+
 
     private record Job(CompletableFuture<List<RawPodResults>> future, Map<PodId, Pod> pods, Map<PodId, CommandStatus> jobs){}
 }

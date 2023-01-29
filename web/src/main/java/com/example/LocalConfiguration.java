@@ -17,6 +17,11 @@ public class LocalConfiguration {
     K8s kube() {
         return new K8s() {
             @Override
+            public Pod runningPod() {
+                return new Pod("127.0.0.1:8080", "localhost");
+            }
+
+            @Override
             public List<Pod> pods() {
                 return List.of(new Pod("127.0.0.1:8080", "localhost"));
             }

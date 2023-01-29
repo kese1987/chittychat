@@ -1,13 +1,13 @@
 package com.example.commander.sender.k8s;
 
+
 import com.example.commander.Pod;
-import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
-import io.fabric8.kubernetes.client.dsl.PodResource;
+import org.apache.commons.lang3.concurrent.AtomicInitializer;
+import org.apache.commons.lang3.concurrent.ConcurrentException;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.function.Predicate;
 
 
 public class DefaultK8s implements K8s {
@@ -17,6 +17,7 @@ public class DefaultK8s implements K8s {
 
     private int port;
     private HostnameSupplier hostnameSupplier;
+    private AtomicInitializer<Pod> runningPod;
 
     public DefaultK8s(KubernetesClient client,
                       NamespaceSupplier namespaceSupplier,
@@ -26,29 +27,45 @@ public class DefaultK8s implements K8s {
         this.namespace = namespaceSupplier;
         this.port = port;
         this.hostnameSupplier = hostnameSupplier;
+        this.runningPod = new AtomicInitializer<Pod>() {
+            @Override
+            protected Pod initialize() throws ConcurrentException {
+                return podsMatching(hostnameSupplier.get(), pod -> pod.getMetadata().getName().equals(hostnameSupplier.get())).stream().findFirst().orElse(null);
+            }
+        };
+
+
+    }
+
+    @Override
+    public Pod runningPod() {
+        try {
+            return runningPod.get();
+        } catch (ConcurrentException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public List<com.example.commander.Pod> pods() {
 
-        /*return Arrays.asList(new DefaultPod("127.0.0.1:8080", "test-localhost"));*/
-
-
         try {
-            String hostname = hostnameSupplier.get();
-            NonNamespaceOperation<io.fabric8.kubernetes.api.model.Pod, PodList, PodResource> appPods = client.pods().inNamespace(namespace.get());
-            return appPods
-                    .list()
-                    .getItems()
-                    .stream()
-                    .filter(it -> !it.getMetadata().getName().equals(hostname))
-                    .map(it -> new Pod(it.getStatus().getPodIP().replace(".", "-") + "." + namespace.get() + ".pod:" + port, it.getMetadata().getName()))
-                    .collect(Collectors.toList());
+            return podsMatching(hostnameSupplier.get(), pod -> !pod.getMetadata().getName().equals(hostnameSupplier.get()));
 
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-
     }
+
+    private List<Pod> podsMatching(String namespace, Predicate<io.fabric8.kubernetes.api.model.Pod> condition) {
+
+        return client.pods().inNamespace(namespace)
+                .list()
+                .getItems()
+                .stream()
+                .filter(condition)
+                .map(it -> new Pod(it.getStatus().getPodIP().replace(".", "-") + "." + namespace + ".pod:" + port, it.getMetadata().getName()))
+                .toList();
+    }
+
 }
