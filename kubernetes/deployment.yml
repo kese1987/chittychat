@@ -67,7 +67,7 @@ spec:
       http:
         paths:
           - pathType: Prefix
-            path: "/ping"
+            path: /
             backend:
               service:
                 name: cc-svc
